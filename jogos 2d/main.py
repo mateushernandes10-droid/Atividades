@@ -4,12 +4,11 @@ import random
 from typing import Optional
 import arcade
 
-
-# CONFIGURACOES GERAIS
+# CONFIGURAÇÕES GERAIS
 
 LARGURA_TELA = 1180
 ALTURA_TELA = 720
-TITULO_TELA = "Demonstrção - Utility AI Simplificada"
+TITULO_TELA = "Demonstração - Utility AI Simplificada"
 
 ARENA_ESQUERDA = 24
 ARENA_DIREITA = 856
@@ -36,7 +35,7 @@ RECARGA_TIRO_NPC = 0.90
 
 VIDA_MAXIMA = 100
 
-# Assets da propria biblioteca Arcade.
+# Assets da própria biblioteca Arcade.
 TEXTURA_JOGADOR = ":resources:images/topdown_tanks/tankBody_blue_outline.png"
 TEXTURA_NPC = ":resources:images/topdown_tanks/tankBody_red_outline.png"
 TEXTURA_VIDA = ":resources:images/items/gemGreen.png"
@@ -62,24 +61,24 @@ COR_PATRULHA = (178, 126, 255)
 COR_PERIGO = (255, 94, 94)
 
 
-# FUNCOES AUXILIARES
+# FUNÇÕES AUXILIARES
 
-# Mantem um valor dentro de um intervalo.
+# Mantém um valor dentro de um intervalo.
 def limitar(valor: float, minimo: float, maximo: float) -> float:
     return max(minimo, min(maximo, valor))
 
-# Calcula a distancia entre dois pontos do plano 2D.
+# Calcula a distância entre dois pontos do plano 2D.
 def calcular_distancia(x1: float, y1: float, x2: float, y2: float) -> float:
     return math.hypot(x2 - x1, y2 - y1)
 
-# Transforma um vetor em direcao com tamanho 1.
+# Transforma um vetor em direção com tamanho 1.
 def normalizar(vetor_x: float, vetor_y: float) -> tuple[float, float]:
     tamanho = math.hypot(vetor_x, vetor_y)
     if tamanho == 0:
         return 0, 0
     return vetor_x / tamanho, vetor_y / tamanho
 
-# Converte uma direcao em angulo para girar o sprite.
+# Converte uma direção em ângulo para girar o sprite.
 def angulo_do_vetor(vetor_x: float, vetor_y: float) -> float:
     # Pequenos desvios aparecem por causa do movimento com delta_time.
     # Se um dos eixos for quase zero, tratamos como movimento reto.
@@ -91,7 +90,7 @@ def angulo_do_vetor(vetor_x: float, vetor_y: float) -> float:
     angulo = math.degrees(math.atan2(vetor_y, vetor_x)) - 90
 
     # Nas diagonais, o sprite do tanque ficava visualmente de lado.
-    # Esta correcao so acontece quando existe movimento nos dois eixos.
+    # Esta correção só acontece quando existe movimento nos dois eixos.
     if vetor_x != 0 and vetor_y != 0:
         angulo += 90
 
@@ -111,7 +110,7 @@ def retangulo_centralizado(x: float, y: float, largura: float, altura: float) ->
         y=y,
     )
 
-# Impede que jogador ou NPC saiam da area jogavel.
+# Impede que jogador ou NPC saiam da área jogável.
 # O centro do sprite permanece dentro dos limites da arena.
 def manter_dentro_da_arena(sprite: arcade.Sprite) -> None:
     metade_largura = sprite.width / 2
@@ -119,29 +118,29 @@ def manter_dentro_da_arena(sprite: arcade.Sprite) -> None:
     sprite.center_x = limitar(sprite.center_x, ARENA_ESQUERDA + metade_largura, ARENA_DIREITA - metade_largura)
     sprite.center_y = limitar(sprite.center_y, ARENA_BAIXO + metade_altura, ARENA_CIMA - metade_altura)
 
-# Move um sprite em direcao a um alvo usando delta_time.
+# Move um sprite em direção a um alvo usando delta_time.
 def mover_em_direcao(sprite: arcade.Sprite, alvo_x: float, alvo_y: float, velocidade: float, delta_time: float) -> None:
     direcao_x, direcao_y = normalizar(alvo_x - sprite.center_x, alvo_y - sprite.center_y)
     sprite.center_x += direcao_x * velocidade * delta_time
     sprite.center_y += direcao_y * velocidade * delta_time
 
-    # Gira o sprite para apontar para onde esta andando.
+    # Gira o sprite para apontar para onde está andando.
     if direcao_x != 0 or direcao_y != 0:
         sprite.angle = angulo_do_vetor(direcao_x, direcao_y)
 
     manter_dentro_da_arena(sprite)
 
 
-# Guarda o nome, o valor e a cor de uma acao da Utility AI.
+# Guarda o nome, o valor e a cor de uma ação da Utility AI.
 @dataclass
 class PontuacaoUtilidade:
     nome: str
     valor: float
     cor: tuple[int, int, int]
 
-# Cria um efeito visual simples usado quando ha tiro, dano ou troca de acao.
+# Cria um efeito visual simples usado quando há tiro, dano ou troca de ação.
 class ParticulaFlutuante(arcade.Sprite):
-    # Inicializa a particula com cor, velocidade e tempo de vida aleatorios.
+    # Inicializa a partícula com cor, velocidade e tempo de vida aleatórios.
     def __init__(self, x: float, y: float, cor: tuple[int, int, int], velocidade: float = 160) -> None:
         super().__init__()
 
@@ -161,7 +160,7 @@ class ParticulaFlutuante(arcade.Sprite):
         self.vida = random.uniform(0.28, 0.58)
         self.vida_inicial = self.vida
 
-    # Atualiza a posicao e reduz a transparencia da particula ate ela sumir.
+    # Atualiza a posição e reduz a transparência da partícula até ela sumir.
     def update(self, delta_time: float = 1 / 60) -> None:
         self.center_x += self.change_x * delta_time
         self.center_y += self.change_y * delta_time
@@ -226,9 +225,9 @@ class Tiro(arcade.Sprite):
         if saiu_da_arena or self.tempo_de_vida <= 0:
             self.remove_from_sprite_lists()
 
-# Representa o item que recupera vida do NPC quando a acao Buscar Vida vence.
+# Representa o item que recupera vida do NPC quando a ação Buscar Vida vence.
 class KitVida:
-    # Guarda a posicao, textura e estado inicial do kit de vida.
+    # Guarda a posição, textura e estado inicial do kit de vida.
     def __init__(self, x: float, y: float, textura: arcade.Texture) -> None:
         self.x = x
         self.y = y
@@ -253,7 +252,7 @@ class KitVida:
         self.ativo = False
         self.tempo_respawn = 7.0
 
-    # Desenha o kit ativo ou o marcador vazio quando ele esta em respawn.
+    # Desenha o kit ativo ou o marcador vazio quando ele está em respawn.
     def desenhar(self) -> None:
         raio_pulso = 28 + math.sin(self.pulso) * 4
 
@@ -270,7 +269,7 @@ class KitVida:
             arcade.draw_circle_outline(self.x, self.y, 19, (66, 78, 92), 2)
 
 # Controla o tanque azul do jogador, suas vidas, tiros e movimento.
-# O jogador e controlado por teclado e mouse.
+# O jogador é controlado por teclado e mouse.
 class Jogador:
     # Inicializa o sprite, a vida, os temporizadores e o estado das teclas.
     def __init__(self) -> None:
@@ -279,7 +278,7 @@ class Jogador:
         self.tempo_flash_tiro = 0.0
         self.recarga_tiro = 0.0
 
-        # Guardamos o estado das teclas para permitir movimento continuo.
+        # Guardamos o estado das teclas para permitir movimento contínuo.
         self.teclas = {
             arcade.key.RIGHT: False,
             arcade.key.LEFT: False,
@@ -291,7 +290,7 @@ class Jogador:
             arcade.key.S: False,
         }
 
-    # Define a posicao inicial e reinicia os estados do jogador.
+    # Define a posição inicial e reinicia os estados do jogador.
     def configurar(self) -> None:
         self.sprite.center_x = 160
         self.sprite.center_y = 360
@@ -317,7 +316,7 @@ class Jogador:
             self.teclas[tecla] = False
             self.atualizar_velocidade()
 
-    # Calcula a direcao do movimento a partir das teclas pressionadas.
+    # Calcula a direção do movimento a partir das teclas pressionadas.
     def atualizar_velocidade(self) -> None:
         movimento_x = 0
         movimento_y = 0
@@ -338,7 +337,7 @@ class Jogador:
         if direcao_x != 0 or direcao_y != 0:
             self.sprite.angle = angulo_do_vetor(direcao_x, direcao_y)
 
-    # Tenta criar um tiro em direcao ao alvo, respeitando a recarga.
+    # Tenta criar um tiro em direção ao alvo, respeitando a recarga.
     def atirar_para(self, alvo_x: float, alvo_y: float) -> Optional[Tiro]:
         if self.recarga_tiro > 0:
             return None
@@ -361,7 +360,7 @@ class Jogador:
             "jogador",
         )
 
-    # Atualiza a posicao do jogador e os temporizadores de tiro.
+    # Atualiza a posição do jogador e os temporizadores de tiro.
     def atualizar(self, delta_time: float) -> None:
         self.sprite.center_x += self.sprite.change_x * delta_time
         self.sprite.center_y += self.sprite.change_y * delta_time
@@ -370,7 +369,7 @@ class Jogador:
         self.tempo_flash_tiro = max(0, self.tempo_flash_tiro - delta_time)
         self.recarga_tiro = max(0, self.recarga_tiro - delta_time)
 
-    # Desenha o brilho rapido que aparece quando o jogador atira.
+    # Desenha o brilho rápido que aparece quando o jogador atira.
     def desenhar_flash_tiro(self) -> None:
         if self.tempo_flash_tiro <= 0:
             return
@@ -379,14 +378,14 @@ class Jogador:
         arcade.draw_circle_outline(self.sprite.center_x, self.sprite.center_y, 36, COR_ATAQUE, 3)
 
 
-# Controla o NPC vermelho usando Utility AI para decidir a melhor acao.
+# Controla o NPC vermelho usando Utility AI para decidir a melhor ação.
 class NpcUtilidade:
     PATRULHAR = "Patrulhar"
     ATACAR = "Atacar"
     FUGIR = "Fugir"
     BUSCAR_VIDA = "Buscar vida"
 
-    # Inicializa o sprite, a vida, os alvos, as pontuacoes e os temporizadores.
+    # Inicializa o sprite, a vida, os alvos, as pontuações e os temporizadores.
     def __init__(self) -> None:
         self.sprite = arcade.Sprite(TEXTURA_NPC, scale=1.18)
         self.vida = VIDA_MAXIMA
@@ -423,10 +422,10 @@ class NpcUtilidade:
         self.tempo_troca_acao = 0.0
         self.recarga_tiro = 0.0
 
-    # Recalcula a Utility AI, escolhe a acao atual e executa o comportamento do NPC.
+    # Recalcula a Utility AI, escolhe a ação atual e executa o comportamento do NPC.
     def atualizar(self, jogador: Jogador, kits_vida: list[KitVida], delta_time: float) -> Optional[Tiro]:
-        # A cada quadro o NPC recalcula as utilidades, escolhe a melhor acao
-        # e executa essa acao.
+        # A cada quadro o NPC recalcula as utilidades, escolhe a melhor ação
+        # e executa essa ação.
         self.recarga_tiro = max(0, self.recarga_tiro - delta_time)
         self.calcular_utilidades(jogador, kits_vida)
         self.escolher_acao()
@@ -435,7 +434,7 @@ class NpcUtilidade:
         self.tempo_troca_acao = max(0, self.tempo_troca_acao - delta_time)
         return tiro
 
-    # Calcula quanto cada acao vale no momento atual.
+    # Calcula quanto cada ação vale no momento atual.
     def calcular_utilidades(self, jogador: Jogador, kits_vida: list[KitVida]) -> None:
         distancia_jogador = calcular_distancia(
             self.sprite.center_x,
@@ -458,8 +457,8 @@ class NpcUtilidade:
             distancia_kit = calcular_distancia(self.sprite.center_x, self.sprite.center_y, kit_mais_perto.x, kit_mais_perto.y)
             pontuacao_kit = 1 - limitar(distancia_kit / 520, 0, 1)
 
-        # Formula da Utility AI:
-        # cada acao recebe uma pontuacao. A maior pontuacao vence.
+        # Fórmula da Utility AI:
+        # cada ação recebe uma pontuação. A maior pontuação vence.
         pontuacao_atacar = limitar(
             0.08 + jogador_perto * 0.76 + porcentagem_vida * 0.18 + jogador_fraco * 0.18 - vida_baixa * 0.38,
             0,
@@ -491,7 +490,7 @@ class NpcUtilidade:
             PontuacaoUtilidade(self.PATRULHAR, pontuacao_patrulhar, COR_PATRULHA),
         ]
 
-    # Escolhe a acao com maior pontuacao de utilidade.
+    # Escolhe a ação com maior pontuação de utilidade.
     def escolher_acao(self) -> None:
         melhor = max(self.pontuacoes, key=lambda item: item.valor)
         self.acao_atual = melhor.nome
@@ -500,7 +499,7 @@ class NpcUtilidade:
             self.tempo_troca_acao = 0.45
             self.acao_anterior = self.acao_atual
 
-    # Executa o comportamento correspondente a acao escolhida pela Utility AI.
+    # Executa o comportamento correspondente à ação escolhida pela Utility AI.
     def executar_acao(self, jogador: Jogador, kits_vida: list[KitVida], delta_time: float) -> Optional[Tiro]:
         if self.acao_atual == self.ATACAR:
             self.alvo_x = jogador.sprite.center_x
@@ -578,8 +577,8 @@ class NpcUtilidade:
         self.alvo_x, self.alvo_y = self.pontos_patrulha[self.indice_patrulha]
 
         if calcular_distancia(self.sprite.center_x, self.sprite.center_y, self.alvo_x, self.alvo_y) <= 18:
-            # Encaixa exatamente no cruzamento antes de escolher o proximo alvo.
-            # Isso evita que pequenos desvios facam o tanque parecer andar de lado.
+            # Encaixa exatamente no cruzamento antes de escolher o próximo alvo.
+            # Isso evita que pequenos desvios façam o tanque parecer andar de lado.
             self.sprite.center_x = self.alvo_x
             self.sprite.center_y = self.alvo_y
             self.indice_patrulha = (self.indice_patrulha + 1) % len(self.pontos_patrulha)
@@ -587,7 +586,7 @@ class NpcUtilidade:
 
         mover_em_direcao(self.sprite, self.alvo_x, self.alvo_y, VELOCIDADE_PATRULHA_NPC, delta_time)
 
-    # Procura o kit de vida ativo mais proximo do NPC.
+    # Procura o kit de vida ativo mais próximo do NPC.
     def encontrar_kit_vida_mais_perto(self, kits_vida: list[KitVida]) -> Optional[KitVida]:
         kits_ativos = [kit for kit in kits_vida if kit.ativo]
         if not kits_ativos:
@@ -612,7 +611,7 @@ class NpcUtilidade:
             key=lambda ponto: calcular_distancia(ponto[0], ponto[1], jogador.sprite.center_x, jogador.sprite.center_y),
         )
 
-    # Retorna a cor usada para representar a acao atual do NPC.
+    # Retorna a cor usada para representar a ação atual do NPC.
     def cor_da_acao(self) -> tuple[int, int, int]:
         if self.acao_atual == self.ATACAR:
             return COR_ATAQUE
@@ -622,7 +621,7 @@ class NpcUtilidade:
             return COR_VIDA
         return COR_PATRULHA
 
-    # Desenha a linha ate o alvo e o estado atual da IA.
+    # Desenha a linha até o alvo e o estado atual da IA.
     def desenhar_debug(self) -> None:
         cor = self.cor_da_acao()
         espessura_anel = 5 if self.tempo_troca_acao > 0 else 3
@@ -649,7 +648,7 @@ class NpcUtilidade:
         arcade.draw_text(self.acao_atual, self.sprite.center_x, self.sprite.center_y + 48, BRANCO, 12, anchor_x="center")
 
 
-# Controla a janela principal e organiza desenho, atualizacao e eventos.
+# Controla a janela principal e organiza desenho, atualização e eventos.
 class Jogo(arcade.Window):
     # Inicializa a janela, os personagens, as listas de sprites e as texturas.
     def __init__(self) -> None:
@@ -703,7 +702,7 @@ class Jogo(arcade.Window):
 
         self.npc.calcular_utilidades(self.jogador, self.kits_vida)
 
-    # Monta o chao com grama e ruas em formato de malha.
+    # Monta o chão com grama e ruas em formato de malha.
     def criar_tiles_da_arena(self) -> None:
         self.tiles_chao = []
         colunas = int((ARENA_DIREITA - ARENA_ESQUERDA) / TAMANHO_TILE)
@@ -771,7 +770,7 @@ class Jogo(arcade.Window):
 
         self.desenhar_painel()
 
-    # Atualiza a logica do jogo a cada quadro chamado pela Arcade.
+    # Atualiza a lógica do jogo a cada quadro chamado pela Arcade.
     def on_update(self, delta_time: float) -> None:
         for kit in self.kits_vida:
             kit.atualizar(delta_time)
@@ -814,7 +813,7 @@ class Jogo(arcade.Window):
     def on_key_release(self, key: int, modifiers: int) -> None:
         self.jogador.soltar_tecla(key)
 
-    # Cria varias particulas flutuantes em uma posicao da arena.
+    # Cria várias partículas flutuantes em uma posição da arena.
     def criar_particulas(self, x: float, y: float, cor: tuple[int, int, int], quantidade: int, velocidade: float) -> None:
         for _ in range(quantidade):
             self.lista_particulas.append(ParticulaFlutuante(x, y, cor, velocidade))
@@ -880,7 +879,7 @@ class Jogo(arcade.Window):
             arcade.draw_circle_filled(ponto[0], ponto[1], 9, (178, 126, 255, 70))
             arcade.draw_circle_outline(ponto[0], ponto[1], 12, COR_PATRULHA, 2)
 
-    # Desenha o painel lateral com vida, acao atual, utilidades e controles.
+    # Desenha o painel lateral com vida, ação atual, utilidades e controles.
     def desenhar_painel(self) -> None:
         arcade.draw_lrbt_rectangle_filled(
             left=PAINEL_ESQUERDA - 18,
@@ -983,7 +982,7 @@ class Jogo(arcade.Window):
             border_width=1,
         )
 
-    # Desenha o icone e a barra de vida de um personagem.
+    # Desenha o ícone e a barra de vida de um personagem.
     def desenhar_status_vida(
         self,
         x: float,
