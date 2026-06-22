@@ -17,7 +17,7 @@ O NPC calcula valores de utilidade para quatro acoes:
 
 A acao com maior pontuacao e escolhida a cada atualizacao do jogo. Os valores aparecem no painel lateral durante a execucao.
 
-O exemplo foi montado como uma arena top-down com assets da propria Arcade: tanques, estrada em tiles formando uma malha, props de cenario, itens de vida, tiros, particulas e indicadores visuais da decisao atual.
+O exemplo foi montado como uma arena top-down com assets da propria Arcade: tanques, estrada em tiles formando uma malha, props de cenario, itens de vida usados pelo jogador e pelo NPC, tiros, particulas e indicadores visuais da decisao atual.
 
 ## Como executar
 
@@ -48,7 +48,7 @@ python main.py
 - `Jogador`: controla movimento, tiro e vida do jogador.
 - `NpcUtilidade`: calcula utilidades, escolhe a maior acao e executa o comportamento.
 - `Tiro`: representa os tiros do jogador e do NPC.
-- `KitVida`: representa itens de vida usados pela IA.
+- `KitVida`: representa itens de vida que recuperam o jogador ou o NPC.
 - `ParticulaFlutuante`: cria feedback visual para dano e troca de comportamento.
 - `Jogo`: janela principal da Arcade, atualizacao, desenho, eventos de teclado e HUD.
 

@@ -15,7 +15,7 @@ No exemplo, o NPC pode:
 
 ## 2. O que aparece na tela
 
-O jogador e o tanque azul. O NPC e o tanque vermelho. Os cristais verdes com simbolo de cura funcionam como pontos de vida. A estrada forma uma malha, mas o NPC usa apenas um trecho dela como trajeto de patrulha. A linha colorida mostra o alvo atual da IA e os circulos roxos marcam os pontos do percurso. No painel lateral aparecem as barras de utilidade e os simbolos de vida do jogador e do NPC.
+O jogador e o tanque azul. O NPC e o tanque vermelho. Os cristais verdes com simbolo de cura recuperam a vida de quem encostar neles, jogador ou NPC. A estrada forma uma malha, mas o NPC usa apenas um trecho dela como trajeto de patrulha. A linha colorida mostra o alvo atual da IA e os circulos roxos marcam os pontos do percurso. No painel lateral aparecem as barras de utilidade e os simbolos de vida do jogador e do NPC.
 
 ## 3. Como a decisao funciona
 
