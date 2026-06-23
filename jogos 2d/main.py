@@ -651,6 +651,12 @@ class Jogo(arcade.Window):
         self.textura_rua_vertical = arcade.load_texture(TEXTURA_RUA_VERTICAL)
         self.textura_cruzamento = arcade.load_texture(TEXTURA_CRUZAMENTO)
 
+        self.jogo_finalizado = False
+        self.texto_resultado = ""
+        self.subtexto_resultado = ""
+        self.cor_resultado = BRANCO
+        self.tempo_fim_jogo = 0.0
+
     def setup(self) -> None:
         """Prepara ou reinicia o jogo."""
         self.jogador.configurar()
@@ -676,6 +682,11 @@ class Jogo(arcade.Window):
         ]
 
         self.npc.calcular_utilidades(self.jogador, self.kits_vida)
+        self.jogo_finalizado = False
+        self.texto_resultado = ""
+        self.subtexto_resultado = ""
+        self.cor_resultado = BRANCO
+        self.tempo_fim_jogo = 0.0
 
     def criar_tiles_da_arena(self) -> None:
         """Monta o chao com grama e ruas em formato de malha."""
@@ -745,15 +756,27 @@ class Jogo(arcade.Window):
 
         self.desenhar_painel()
 
+        if self.jogo_finalizado:
+            self.desenhar_fim_de_jogo()
+
     def on_update(self, delta_time: float) -> None:
         """Metodo chamado pela Arcade para atualizar a logica do jogo."""
+        self.lista_particulas.update(delta_time)
+
+        if self.jogo_finalizado:
+            self.tempo_fim_jogo += delta_time
+            return
+
         for kit in self.kits_vida:
             kit.atualizar(delta_time)
 
-        self.lista_particulas.update(delta_time)
         self.lista_tiros_jogador.update(delta_time)
         self.lista_tiros_npc.update(delta_time)
         self.verificar_colisoes_dos_tiros()
+        self.verificar_fim_de_jogo()
+
+        if self.jogo_finalizado:
+            return
 
         if self.jogador.vida > 0 and self.npc.vida > 0:
             self.jogador.atualizar(delta_time)
@@ -774,6 +797,9 @@ class Jogo(arcade.Window):
             self.setup()
             return
 
+        if self.jogo_finalizado:
+            return
+
         if key == arcade.key.SPACE:
             tiro = self.jogador.atirar_para(self.npc.sprite.center_x, self.npc.sprite.center_y)
             if tiro is not None:
@@ -791,6 +817,44 @@ class Jogo(arcade.Window):
     def criar_particulas(self, x: float, y: float, cor: tuple[int, int, int], quantidade: int, velocidade: float) -> None:
         for _ in range(quantidade):
             self.lista_particulas.append(ParticulaFlutuante(x, y, cor, velocidade))
+
+    def finalizar_jogo(self, texto: str, subtexto: str, cor: tuple[int, int, int]) -> None:
+        """Entra no estado de fim de rodada com uma mensagem clara."""
+        self.jogo_finalizado = True
+        self.texto_resultado = texto
+        self.subtexto_resultado = subtexto
+        self.cor_resultado = cor
+        self.tempo_fim_jogo = 0.0
+
+        self.jogador.sprite.change_x = 0
+        self.jogador.sprite.change_y = 0
+
+        for tiro in list(self.lista_tiros_jogador):
+            tiro.remove_from_sprite_lists()
+        for tiro in list(self.lista_tiros_npc):
+            tiro.remove_from_sprite_lists()
+
+    def verificar_fim_de_jogo(self) -> None:
+        """Verifica se a rodada terminou depois das colisoes dos tiros."""
+        if self.jogo_finalizado:
+            return
+
+        jogador_derrotado = self.jogador.vida <= 0
+        npc_derrotado = self.npc.vida <= 0
+
+        if not jogador_derrotado and not npc_derrotado:
+            return
+
+        if jogador_derrotado and npc_derrotado:
+            self.criar_particulas(self.jogador.sprite.center_x, self.jogador.sprite.center_y, BRANCO, 28, 180)
+            self.criar_particulas(self.npc.sprite.center_x, self.npc.sprite.center_y, BRANCO, 28, 180)
+            self.finalizar_jogo("Empate", "Os dois tanques ficaram sem vida.", BRANCO)
+        elif jogador_derrotado:
+            self.criar_particulas(self.jogador.sprite.center_x, self.jogador.sprite.center_y, COR_PERIGO, 42, 210)
+            self.finalizar_jogo("NPC venceu", "O jogador foi derrotado pela IA.", COR_PERIGO)
+        else:
+            self.criar_particulas(self.npc.sprite.center_x, self.npc.sprite.center_y, COR_JOGADOR, 42, 210)
+            self.finalizar_jogo("Jogador venceu", "O NPC foi desativado.", COR_JOGADOR)
 
     def verificar_coleta_de_vida_do_jogador(self) -> None:
         """Recupera vida do jogador quando ele passa por cima de um kit ativo."""
@@ -929,7 +993,7 @@ class Jogo(arcade.Window):
             color=cor_acao,
             border_width=2,
         )
-        arcade.draw_text("Acao atual", PAINEL_ESQUERDA + 12, 460, CINZA_TEXTO, 11)
+        arcade.draw_text("Ação atual", PAINEL_ESQUERDA + 12, 460, CINZA_TEXTO, 11)
         arcade.draw_text(self.npc.acao_atual, PAINEL_ESQUERDA + 95, 457, BRANCO, 16)
 
         arcade.draw_text("Matriz de utilidade", PAINEL_ESQUERDA, 416, BRANCO, 15)
@@ -947,7 +1011,9 @@ class Jogo(arcade.Window):
         arcade.draw_text("Espaco          atirar", PAINEL_ESQUERDA, 102, CINZA_TEXTO, 12)
         arcade.draw_text("R               reiniciar", PAINEL_ESQUERDA, 80, CINZA_TEXTO, 12)
 
-        if self.jogador.vida <= 0:
+        if self.jogo_finalizado:
+            arcade.draw_text("Fim da rodada - R reinicia", PAINEL_ESQUERDA, 55, self.cor_resultado, 13)
+        elif self.jogador.vida <= 0:
             arcade.draw_text("Jogador derrotado", PAINEL_ESQUERDA, 55, COR_PERIGO, 14)
         elif self.npc.vida <= 0:
             arcade.draw_text("NPC desativado", PAINEL_ESQUERDA, 55, COR_ATAQUE, 14)
@@ -1023,6 +1089,51 @@ class Jogo(arcade.Window):
             color=(84, 96, 116),
             border_width=1,
         )
+
+    def desenhar_fim_de_jogo(self) -> None:
+        """Desenha uma mensagem grande de fim de rodada sobre a arena."""
+        centro_x = (ARENA_ESQUERDA + ARENA_DIREITA) / 2
+        centro_y = (ARENA_BAIXO + ARENA_CIMA) / 2
+        largura = 520
+        altura = 230
+        pulso = 0.65 + math.sin(self.tempo_fim_jogo * 4.0) * 0.35
+        borda = 3 + int(pulso * 3)
+
+        arcade.draw_lrbt_rectangle_filled(
+            left=ARENA_ESQUERDA,
+            right=ARENA_DIREITA,
+            bottom=ARENA_BAIXO,
+            top=ARENA_CIMA,
+            color=(5, 8, 13, 180),
+        )
+        arcade.draw_lrbt_rectangle_filled(
+            left=centro_x - largura / 2,
+            right=centro_x + largura / 2,
+            bottom=centro_y - altura / 2,
+            top=centro_y + altura / 2,
+            color=(18, 23, 33, 240),
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            left=centro_x - largura / 2,
+            right=centro_x + largura / 2,
+            bottom=centro_y - altura / 2,
+            top=centro_y + altura / 2,
+            color=self.cor_resultado,
+            border_width=borda,
+        )
+
+        arcade.draw_text("Fim da rodada", centro_x, centro_y + 70, CINZA_TEXTO, 17, anchor_x="center")
+        arcade.draw_text(self.texto_resultado, centro_x, centro_y + 28, self.cor_resultado, 32, anchor_x="center")
+        arcade.draw_text(self.subtexto_resultado, centro_x, centro_y - 16, BRANCO, 15, anchor_x="center")
+        arcade.draw_text(
+            f"Vida jogador: {self.jogador.vida:.0f}   |   Vida NPC: {self.npc.vida:.0f}",
+            centro_x,
+            centro_y - 48,
+            CINZA_TEXTO,
+            13,
+            anchor_x="center",
+        )
+        arcade.draw_text("Pressione R para jogar novamente", centro_x, centro_y - 82, BRANCO, 15, anchor_x="center")
 
 
 def main() -> None:
